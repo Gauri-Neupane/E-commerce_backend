@@ -1,20 +1,40 @@
 const express = require("express");
-const Product = require("../models/Product");
-const { protect, admin } = require("../middleware/authMiddleware");
+const cors = require("cors");
 
-const router = express.Router();
+const dotenv = require("dotenv");
 
-// @route GET /api/admin/products
-// @desc Get all products (Admin only)
-// @access Private/Admin
-router.get("/", protect, admin, async (req, res) => {
-  try {
-    const products = await Product.find({});
-    res.json(products);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Server Error" });
-  }
+const connectDB = require("./config/db");
+
+const userRoutes = require("./routes/userRoutes");
+
+const productRoutes = require("./routes/productRoutes");
+
+const cartRoutes = require("./routes/cartRoutes");
+const checkoutRoutes = require("./routes/checkoutRoutes");
+const subscribeRoutes = require("./routes/subscribeRoute");
+const adminRoutes = require("./routes/adminRoutes");
+
+const app = express();
+app.use(express.json());
+
+app.use(cors());
+dotenv.config();
+
+const PORT = process.env.PORT || 3000;
+
+connectDB();
+
+app.get("/", (req, res) => {
+  res.send("Welcome to Fancy API!");
 });
 
-module.exports = router;
+app.use("/api/users", userRoutes);
+app.use("/api/products", productRoutes);
+app.use("/api/cart", cartRoutes);
+app.use("/api/checkout", checkoutRoutes);
+app.use("/api/subscribe", subscribeRoutes);
+app.use("/api/admin/users",adminRoutes);
+
+app.listen(PORT, () => {
+  console.log(`Server is running on http://localhost:${PORT}`);
+});
