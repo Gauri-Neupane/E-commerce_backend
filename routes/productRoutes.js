@@ -11,6 +11,7 @@ router.post("/", protect, admin, async (req, res) => {
   // console.log(req.user);
   // return;
   try {
+    console.log(req.body)
     const {
       name,
       description,
@@ -33,7 +34,7 @@ router.post("/", protect, admin, async (req, res) => {
       sku,
       user,
     } = req.body;
-
+    
     const product = new Product({
       name,
       description,
@@ -56,7 +57,7 @@ router.post("/", protect, admin, async (req, res) => {
       sku,
       user: req.user._id, // Reference to the admin user who created it
     });
-
+    
     const createdProduct = await product.save();
     res.status(201).json(createdProduct);
   } catch (error) {
@@ -189,8 +190,11 @@ router.get("/", async (req, res) => {
     }
 
     if (brand) {
-      query.brand = { $in: brand.split(",") };
-    }
+  const brandsArray = brand
+    .split(",")
+    .map((b) => new RegExp("^" + b.trim() + "$", "i")); // exact match but ignore case
+  query.brand = { $in: brandsArray };
+}
 
     if (size) {
       query.sizes = { $in: size.split(",") };
